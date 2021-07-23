@@ -1,0 +1,26 @@
+{
+  "name": "eris",
+  "version": "1.0.0",
+  "description": "td discord bot",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tamu-datathon-org/eris.git"
+  },
+  "keywords": [
+    "bot"
+  ],
+  "author": "tamudatathon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tamu-datathon-org/eris/issues"
+  },
+  "homepage": "https://github.com/tamu-datathon-org/eris#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "dotenv": "^10.0.0"
+  }
+}
