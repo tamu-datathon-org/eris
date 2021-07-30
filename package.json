@@ -21,6 +21,7 @@
   "homepage": "https://github.com/tamu-datathon-org/eris#readme",
   "dependencies": {
     "discord.js": "^12.5.3",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "mongodb": "^4.0.1"
   }
 }

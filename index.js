@@ -12,7 +12,7 @@ Object.keys(botCommands).map(key => {
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 bot.login(TOKEN);
 
-bot.on('ready', () => {
+bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`);
 });
 
