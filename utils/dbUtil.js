@@ -17,7 +17,7 @@ const close = async (client) => {
  * @param {Date} timeBefore 
  */
 const addReminder = async (client, sender, eventId, timeBefore) => {
-    const result = await client.db(DB_NAME).collection('erisreminder').insertOne({
+    await client.db(DB_NAME).collection('erisreminder').insertOne({
         sender,
         eventId,
         timeBefore,
@@ -31,12 +31,18 @@ const addReminder = async (client, sender, eventId, timeBefore) => {
  * @param {string} eventId 
  */
 const removeReminder = async (client, sender, eventId) => {
-    const result = await client.db(DB_NAME).collection('erisreminder').deleteMany({
+    await client.db(DB_NAME).collection('erisreminder').deleteMany({
         sender,
         eventId,
     });
 };
 
+/**
+ * query an event
+ * @param {MongoClient} client 
+ * @param {string} name 
+ * @returns {Object}
+ */
 const getEvent = async (client, name) => {
     const result = await client.db(DB_NAME).collection('events').findOne({
         name,
@@ -52,7 +58,7 @@ const getEvent = async (client, name) => {
  * @param {string} channel 
  */
 const addTracker = async (client, sender, senderType, channel) => {
-    const result = await client.db(DB_NAME).collection('eristracker').insertOne({
+    await client.db(DB_NAME).collection('eristracker').insertOne({
         sender,
         senderType,
         channel,
