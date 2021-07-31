@@ -1,15 +1,9 @@
 const { MongoClient } = require('mongodb');
 
 const uri = '';
+const DB_NAME = '<dbname>';
 
-const connect = async () => {
-    try {
-        return (new MongoClient(uri)).connect();
-    } catch (err) {
-        console.log('connection failed');
-        throw new Error(`attempt to connect to database failed: ${err.message}`);
-    }
-};
+const connect = async () => (new MongoClient(uri)).connect();
 
 const close = async (client) => {
     if (client) await client.close();
@@ -23,33 +17,32 @@ const close = async (client) => {
  * @param {Date} timeBefore 
  */
 const addReminder = async (client, sender, eventId, timeBefore) => {
-    try {
-        const result = await client.collection('erisreminder').insertOne({
-            sender,
-            eventId,
-            timeBefore,
-        });
-        console.log(`${result.insertedCount} documents were inserted with the _id: ${result.insertedId}`);
-    } catch (err) {
-        console.log(`sorry, could not add a reminder ${err.message}`);
-    }
+    const result = await client.db(DB_NAME).collection('erisreminder').insertOne({
+        sender,
+        eventId,
+        timeBefore,
+    });
 };
 
 /**
- * deletes all erisreminder documents with the given eventId (if the event is canceled)
+ * deletes all erisreminder documents with the given eventId & sender (if the event is changed or something)
  * @param {MongoClient} client 
+ * @param {string} sender
  * @param {string} eventId 
  */
-const updateReminder = async (client, eventId) => {
-    try {
-        const result = await client.deleteMany({
-            eventId,
-        });
-        console.log(`Deleted ${result.deletedCount} documents`);
-    } catch (err) {
-        console.log(`sorry, could not delete all reminders ${err.message}`);
-    }
+const removeReminder = async (client, sender, eventId) => {
+    const result = await client.db(DB_NAME).collection('erisreminder').deleteMany({
+        sender,
+        eventId,
+    });
 };
+
+const getEvent = async (client, name) => {
+    const result = await client.db(DB_NAME).collection('events').findOne({
+        name,
+    });
+    return result;
+}
 
 /**
  * insert one into eristracker
@@ -59,21 +52,18 @@ const updateReminder = async (client, eventId) => {
  * @param {string} channel 
  */
 const addTracker = async (client, sender, senderType, channel) => {
-    try {
-        const result = await client.collection('eristracker').insertOne({
-            sender,
-            eventId,
-            timeBefore,
-        });
-        console.log(`${result.insertedCount} documents were inserted with the _id: ${result.insertedId}`);
-    } catch (err) {
-        console.log(`sorry, could not add a reminder ${err.message}`);
-    }
+    const result = await client.db(DB_NAME).collection('eristracker').insertOne({
+        sender,
+        senderType,
+        channel,
+    });
 };
 
 module.exports = {
     connect,
     close,
     addReminder,
+    removeReminder,
     addTracker,
+    getEvent,
 };
