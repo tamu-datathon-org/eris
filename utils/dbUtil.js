@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, Logger } = require('mongodb');
 
 const uri = '';
 const DB_NAME = '<dbname>';
@@ -22,6 +22,19 @@ const addReminder = async (client, sender, eventId, timeBefore) => {
         eventId,
         timeBefore,
     });
+};
+
+const getAllRemindersOfUser = async (client, sender) => {
+    const cursor = await client.db(DB_NAME).collection('erisreminder').aggregate([
+        { $match: { sender } },
+        { $lookup: {
+            from: 'events',
+            localField: 'eventId',
+            foreignField: '_id',
+            as: 'event_docs',
+        } },
+    ]);
+    return cursor.toArray();
 };
 
 /**
@@ -69,6 +82,7 @@ module.exports = {
     connect,
     close,
     addReminder,
+    getAllRemindersOfUser,
     removeReminder,
     addTracker,
     getEvent,
