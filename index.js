@@ -20,11 +20,22 @@ bot.on('message', msg => {
   const args = msg.content.split(/ +/);
   const command = args.shift().toLowerCase();
 
-  if (!bot.commands.has(command)){
+  if (!bot.commands.has(command)) {
+    if (command === '!help') {
+      let botInfo = '';
+      Object.keys(botCommands).map(key => {
+          botInfo += `name: ${botCommands[key].name} | description: ${botCommands[key].description}
+              syntax: ${botCommands[key].syntax}\n`;
+      });
+      const embed = new Discord.MessageEmbed()
+          .setTitle(`Help`)
+          .setColor(0xff0000)
+          .setDescription(botInfo.length > 0 ? botInfo : `we need to add some bot features...`);
+      msg.channel.send(embed);
+    }
     return track(msg);
   };
 
-  console.info(`Called command: ${command}`);
   try {
     bot.commands.get(command).execute(msg, args);
   } catch (error) {

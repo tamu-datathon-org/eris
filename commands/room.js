@@ -1,6 +1,7 @@
 module.exports = {
   name: '!room',
   description: 'Creates a voice channel',
+  syntax: '!room <room-name>',
   execute(msg, args) {
     const newChannelName = args.join('-');
     const parent = msg.guild.channels.cache.find(c => c.name === "team-rooms" && c.type === "category");
@@ -9,7 +10,7 @@ module.exports = {
         msg.reply(`Team room ${newChannelName} already exists.`)
       } else {
         msg.reply(`Creating team room ${newChannelName}.`);
-        msg.guild.channels.create(newChannelName, { type: 'voice', userLimit: 7, parent: parent })
+        msg.guild.channels.create(newChannelName, { type: 'voice', userLimit: 7, parent: parent });
       }
     }
     else {

@@ -1,4 +1,4 @@
-const { MongoClient, Logger } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const uri = '';
 const DB_NAME = '<dbname>';
@@ -19,7 +19,7 @@ const close = async (client) => {
 const addReminder = async (client, sender, eventId, timeBefore) => {
     await client.db(DB_NAME).collection('erisreminder').insertOne({
         sender,
-        eventId,
+        eventId: new ObjectId(eventId),
         timeBefore,
     });
 };
@@ -46,7 +46,7 @@ const getAllRemindersOfUser = async (client, sender) => {
 const removeReminder = async (client, sender, eventId) => {
     await client.db(DB_NAME).collection('erisreminder').deleteMany({
         sender,
-        eventId,
+        eventId: new ObjectId(eventId),
     });
 };
 
