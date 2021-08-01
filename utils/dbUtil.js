@@ -63,6 +63,16 @@ const getEvent = async (client, name) => {
     return result;
 }
 
+const getEventsInDateRange = async (client, lower, upper) => {
+    const result = await client.db(DB_NAME).collection('events').find({
+        time: {
+            $gte: lower,
+            $lt: upper,
+        }
+    });
+    return result.toArray();
+}
+
 /**
  * insert one into eristracker
  * @param {MongoClient} client 
@@ -70,11 +80,12 @@ const getEvent = async (client, name) => {
  * @param {string} senderType 
  * @param {string} channel 
  */
-const addTracker = async (client, sender, senderType, channel) => {
+const addTracker = async (client, sender, senderType, channel, content) => {
     await client.db(DB_NAME).collection('eristracker').insertOne({
         sender,
         senderType,
         channel,
+        content,
     });
 };
 
@@ -86,4 +97,5 @@ module.exports = {
     removeReminder,
     addTracker,
     getEvent,
+    getEventsInDateRange,
 };

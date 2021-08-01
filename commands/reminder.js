@@ -11,9 +11,10 @@ const TIME_DOMAIN = {
 };
 
 const parseArgs = async (args) => {
+    const tm = args[1] ?? 5;
     let timeDomain = args[2] ?? 'm';
     console.log(timeDomain);
-    const timeMagnitude = Math.floor(parseFloat(args[1])) ?? 5;
+    const timeMagnitude = Math.floor(parseFloat(tm));
     if (!dateUtil.TIME_DOMAIN[timeDomain.toLowerCase()]) {
         timeDomain = (new RegExp(/min/ig)).test(timeDomain) ? 'm' : (new RegExp(/h[ou]*r/ig)).test(timeDomain) ?
             'h' : (new RegExp(/da?ys?/ig)).test(timeDomain) ? 'd' : 'm';
@@ -67,7 +68,7 @@ const createReminder = async (msg, _args, client) => {
     const _timeout = setTimeout(() => sendReminder(msg, username, name, _id, _args[1], _args[2]), tm);
 
     // respond timely
-    await msg.reply(`reminder set for ${await dateUtil.msToTimeDomain(tm)} before ${name}`);
+    await msg.reply(`reminder set for ${await dateUtil.msToTimeDomain(timeBefore)} before ${name}`);
 
     // manage storage
     await removeReminderIfExists(client, username, _id);
@@ -80,7 +81,7 @@ const createReminder = async (msg, _args, client) => {
  */
 module.exports =  {
     name: '!remind',
-    description: 'Creates a reminder for awesome TD events!',
+    description: 'Creates a reminder for our awesome TD events!',
     syntax: '!remind <event-name> <amount-of-time-before-the-event> <time-domain (mins/hours/days)>',
     async execute(msg, args) {
         let client = null;
@@ -88,7 +89,7 @@ module.exports =  {
             const _args = await parseArgs(args);
             console.log(_args);
             client = await dbUtil.connect();
-            if (_args.length < 3) throw new Error(`you didn't enter the right number of arguments!`);
+            if (!_args[0]) throw new Error(`you didn't enter an event!`);
             await createReminder(msg, _args, client);
             await dbUtil.close(client);
         } catch (err) {

@@ -22,15 +22,12 @@ bot.on('message', msg => {
 
   if (!bot.commands.has(command)) {
     if (command === '!help') {
-      let botInfo = '';
-      Object.keys(botCommands).map(key => {
-          botInfo += `name: ${botCommands[key].name} | description: ${botCommands[key].description}
-              syntax: ${botCommands[key].syntax}\n`;
-      });
       const embed = new Discord.MessageEmbed()
-          .setTitle(`Help`)
-          .setColor(0xff0000)
-          .setDescription(botInfo.length > 0 ? botInfo : `we need to add some bot features...`);
+        .setTitle(`Help`)
+        .setColor(0xff0000);
+      Object.keys(botCommands).map(key => {
+        embed.addField(botCommands[key].name, `${botCommands[key].description} \`\`\`${botCommands[key].syntax}\`\`\``);
+      });
       msg.channel.send(embed);
     }
     return track(msg);

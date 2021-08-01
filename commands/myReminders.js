@@ -6,18 +6,18 @@ const sendReminders = async (msg, client) => {
     const { username } = msg.author;
     const reminders = await dbUtil.getAllRemindersOfUser(client, username);
     if (!reminders) throw new Error(`you don't have any reminders yet!`);
-    let reply = '';
-    await Promise.all(await reminders.map(async (reminder) => {
-        const event_doc = reminder.event_docs[0];
-        console.log(reminder);
-        const niceTimeBefore = await dateUtil.msToTimeDomain(reminder.timeBefore);
-        console.log(niceTimeBefore);
-        if (niceTimeBefore && event_doc) reply += `${event_doc.name} | @ ${niceTimeBefore} before ${await dateUtil.formatDate(new Date(event_doc.time))}\n`;
-    }));
     const embed = new MessageEmbed()
       .setTitle(`Your Reminders`)
-      .setColor(0xff0000)
-      .setDescription(reply.length > 0 ? reply : `you don't have any reminders yet!`);
+      .setColor(0xff0000);
+    if (reminders.length > 0) {
+        await Promise.all(await reminders.map(async (reminder) => {
+            const event_doc = reminder.event_docs[0];
+            const niceTimeBefore = await dateUtil.msToTimeDomain(reminder.timeBefore);
+            if (niceTimeBefore && event_doc) embed.addField(event_doc.name, `\`\`\`${niceTimeBefore} before\`\`\` ${await dateUtil.formatDate(new Date(event_doc.time))}`);
+        }));
+    } else {
+        embed.addField('you have no reminder yet!', 'set some with my !remind feature');
+    }
     await msg.channel.send(embed);
 };
 
