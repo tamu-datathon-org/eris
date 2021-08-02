@@ -8,7 +8,7 @@ const sendReminders = async (msg, client) => {
     if (!reminders) throw new Error(`you don't have any reminders yet!`);
     const embed = new MessageEmbed()
       .setTitle(`Your Reminders`)
-      .setColor(0xff0000);
+      .setColor(0x00C3C3);
     if (reminders.length > 0) {
         await Promise.all(await reminders.map(async (reminder) => {
             const event_doc = reminder.event_docs[0];
@@ -18,7 +18,7 @@ const sendReminders = async (msg, client) => {
     } else {
         embed.addField('you have no reminder yet!', 'set some with my !remind feature');
     }
-    await msg.channel.send(embed);
+    await msg.reply(embed);
 };
 
 /**
@@ -26,7 +26,7 @@ const sendReminders = async (msg, client) => {
  */
 module.exports =  {
     name: '!my-reminders',
-    description: 'See all your reminders for our awesome TD events!',
+    description: 'View your reminders for our awesome TD events!',
     syntax: '!my-reminders',
     async execute(msg, args) {
         let client = null;

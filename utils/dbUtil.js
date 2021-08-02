@@ -24,6 +24,12 @@ const addReminder = async (client, sender, eventId, timeBefore) => {
     });
 };
 
+/**
+ * query the reminders a certain user has made
+ * @param {MongoClient} client 
+ * @param {string} sender 
+ * @returns {Array}
+ */
 const getAllRemindersOfUser = async (client, sender) => {
     const cursor = await client.db(DB_NAME).collection('erisreminder').aggregate([
         { $match: { sender } },
@@ -63,6 +69,13 @@ const getEvent = async (client, name) => {
     return result;
 }
 
+/**
+ * get all the events between 2 date objects
+ * @param {MongoClient} client 
+ * @param {Date} lower 
+ * @param {Date} upper 
+ * @returns {Array}
+ */
 const getEventsInDateRange = async (client, lower, upper) => {
     const result = await client.db(DB_NAME).collection('events').find({
         time: {
@@ -89,6 +102,43 @@ const addTracker = async (client, sender, senderType, channel, content) => {
     });
 };
 
+/**
+ * puts a help request into helpqueue
+ * @param {MongoClient} client 
+ * @param {string} sender 
+ * @param {string} topicId 
+ * @param {Date} time 
+ * @param {string} organizer 
+ */
+const addHelpRequest = async (client, sender, topicId, time, organizer = null) => {
+    await client.db(DB_NAME).collection('helpqueue').insertOne({
+        sender,
+        topicId,
+        time,
+        organizer,
+    });
+};
+
+/**
+ * gets the top 5 oldest requests in helpqueue
+ * @param {MongoClient} client 
+ * @returns {Array}
+ */
+const queryHelpQueue = async (client) => {
+    const result = await client.db(DB_NAME).collection('helpqueue').aggregate([
+        { $sort : { time : 1 } },
+        { $limit: 5 },
+    ])
+    return result.toArray();
+};
+
+/**
+ * get the number of help requests waiting
+ * @param {MongoClient} client 
+ * @returns {Integer}
+ */
+const helpQueueCount = async (client) => client.db(DB_NAME).collection('helpqueue').find().count();
+
 module.exports = {
     connect,
     close,
@@ -98,4 +148,7 @@ module.exports = {
     addTracker,
     getEvent,
     getEventsInDateRange,
+    addHelpRequest,
+    queryHelpQueue,
+    helpQueueCount,
 };

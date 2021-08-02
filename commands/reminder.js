@@ -4,11 +4,6 @@ const dateUtil = require('../utils/dateUtil');
 
 // ------------ globals -------------
 const REMINDERS = new Map();
-const TIME_DOMAIN = {
-    m: 60 * 1000,
-    h: 36 * 100 * 1000,
-    d: 864 * 100 * 1000,
-};
 
 const parseArgs = async (args) => {
     const tm = args[1] ?? 5;
@@ -25,25 +20,29 @@ const parseArgs = async (args) => {
 
 const removeReminderIfExists = async (client, sender, eventId) => {
     const oldTimeout = await REMINDERS.get(eventId);
-    if (oldTimeout) {
+    try {
         clearTimeout(oldTimeout);
+        REMINDERS.delete(eventId);
         await dbUtil.removeReminder(client, sender, eventId);
+    } catch (err) {
+        // do nothing
     }
 };
 
 const sendReminder = async (msg, username, eventName, eventId, time, timeDomain) => {
     const embed = new MessageEmbed()
       .setTitle(`WAKE UP ${username}!`)
-      .setColor(0xff0000)
+      .setColor(0x80FFD5)
       .setDescription(`${eventName} is ${timeDomain === 'm' ? `in ${time} mins` : timeDomain === 'h' ? `in ${time} hrs` : timeDomain === 'd' ? `in ${time} days` : 'soon'}!`);
     await msg.channel.send(embed);
-    await msg.reply('howdy!');
     const client = await dbUtil.connect();
     await removeReminderIfExists(client, username, eventId);
     await dbUtil.close(client);
 };
 
-const createReminder = async (msg, _args, client) => {
+const createReminder = async (msg, args, client) => {
+    const _args = await parseArgs(args);
+    if (!_args[0]) throw new Error(`you didn't enter an event!`);
     const timeBefore = parseInt(_args[1]) * dateUtil.TIME_DOMAIN[_args[2]];
 
     // get details
@@ -68,7 +67,7 @@ const createReminder = async (msg, _args, client) => {
     const _timeout = setTimeout(() => sendReminder(msg, username, name, _id, _args[1], _args[2]), tm);
 
     // respond timely
-    await msg.reply(`reminder set for ${await dateUtil.msToTimeDomain(timeBefore)} before ${name}`);
+    await msg.channel.send(`reminder set for ${await dateUtil.msToTimeDomain(timeBefore)} before ${name}`);
 
     // manage storage
     await removeReminderIfExists(client, username, _id);
@@ -81,19 +80,17 @@ const createReminder = async (msg, _args, client) => {
  */
 module.exports =  {
     name: '!remind',
-    description: 'Creates a reminder for our awesome TD events!',
-    syntax: '!remind <event-name> <amount-of-time-before-the-event> <time-domain (mins/hours/days)>',
+    description: 'Creates reminders for our awesome TD events!',
+    syntax: '!remind <event-name> <amount-of-time-before-the-event> <mins/hours/days>',
+    createReminder,
     async execute(msg, args) {
         let client = null;
         try {
-            const _args = await parseArgs(args);
-            console.log(_args);
             client = await dbUtil.connect();
-            if (!_args[0]) throw new Error(`you didn't enter an event!`);
-            await createReminder(msg, _args, client);
+            await createReminder(msg, args, client);
             await dbUtil.close(client);
         } catch (err) {
-            await msg.reply(`sorry ${err.message}`);
+            await msg.channel.send(`sorry ${err.message}`);
             await dbUtil.close(client);
         }
     },
