@@ -22,28 +22,12 @@ const sendEventsToday = async (msg, client) => {
             const menuOption = new MessageMenuOption()
                 .setLabel(event.name)
                 .setEmoji('⏰')
-                // .setValue(`${event.name}__${Date.now()}`)
-                .setValue(event.name);
+                .setValue(`${event.name}__${Date.now()}`)
             menu.addOption(menuOption);
         }));
-        /*
-        msg.client.on('clickMenu', async (m) => {
-            if (m.id.split('-')[0] === 'todayId') {
-                // await m.reply.think();
-                const _client = await dbUtil.connect();
-                await reminder.createReminder(msg, [m.values[0].split('__')[0]], _client);
-                await dbUtil.close(_client);
-                try {
-                    await m.reply.edit('done!');
-                } catch (err) {
-                    await m.reply.send('done!');
-                }
-            }
-        });
-        */
-        await msg.reply(embed, menu);
+        await msg.channel.send(embed, menu);
     } else {
-        await msg.reply('there are no events today :(');
+        await msg.channel.send('there are no events today :(');
     }
 };
 
@@ -61,7 +45,7 @@ module.exports =  {
             await sendEventsToday(msg, client);
             await dbUtil.close(client);
         } catch (err) {
-            await msg.reply(`sorry ${err.message}`);
+            await msg.channel.send(`sorry ${err.message}`);
             await dbUtil.close(client);
         }
     },

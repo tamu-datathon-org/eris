@@ -6,45 +6,71 @@ bot.commands = new Discord.Collection();
 const botCommands = require('./commands');
 const track = require('./tracking');
 const dbUtil = require('./utils/dbUtil');
+const orgUtil = require('./utils/organizerUtil');
 
+// cache for organizer help requests
 const HELP_CACHE = new Map();
+const auditHelpCache = () => {
+  HELP_CACHE.forEach((req) => {
+    if (Date.now() - req.value.time.getTime() > 60 * 1000) HELP_CACHE.delete(req.key); // 10 minutes
+  })
+};
 
+// set the custom commands
 Object.keys(botCommands).map(key => {
   bot.commands.set(botCommands[key].name, botCommands[key]);
 });
 
+// set the bot token
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 bot.login(TOKEN);
 
+// wait until the bot is ready
 bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`);
+  setInterval(() => auditHelpCache, 60 * 1000);
 });
 
+// handle the dropdown menu selections
 bot.on('clickMenu', async (m) => {
-  if (m.id === 'todayId') {
+  const idPrefix = m.id.split('-')[0];
+  if (m.id.split('__')[0] === 'todayId') {
       await m.reply.think();
       m.author = m.clicker.user;
       const _client = await dbUtil.connect();
       await botCommands.Remind.createReminder(m, [m.values[0].split('__')[0]], _client);
       await dbUtil.close(_client);
       await m.reply.edit('done!');
-  } else if (m.id === 'topicId') {
+  } else if (idPrefix === 'topicId') {
       await m.reply.think();
       const { username } = m.clicker.user;
-      if (HELP_CACHE.has(username)) (HELP_CACHE.get(username)).topicId = m.values[0];
-      else HELP_CACHE.set(username, { username: username, topicId: m.values[0] });
+      const req = HELP_CACHE.get(username);
+      const topicId = m.values[0].split('__')[0];
+      if (req) {
+        req.topicId = topicId;
+        req.time = new Date();
+      } else {
+        HELP_CACHE.set(username, { username: username, topicId: topicId, time: new Date() });
+      }
       await m.reply.delete();
-  } else if (m.id === 'organizerId') {
+  } else if (idPrefix === 'organizerId') {
       await m.reply.think();
       const { username } = m.clicker.user;
-      if (HELP_CACHE.has(username)) (HELP_CACHE.get(username)).organizer = m.values[0];
-      else HELP_CACHE.set(username, { username: username, topicId: m.values[0] });
+      const req = HELP_CACHE.get(username);
+      const organizer = m.values[0].split('__')[0];
+      if (req) {
+        req.organizer = organizer;
+        req.time = new Date();
+      } else {
+        HELP_CACHE.set(username, { username: username, organizer: organizer, time: new Date() });
+      }
       await m.reply.delete();
   }
 });
 
 bot.on('clickButton', async (b) => {
-  if (b.id.split('-')[0] === 'btnOrganizerQueue') {
+  const idPrefix = b.id.split('-')[0];
+  if (idPrefix === 'btnOrganizerQueue') {
     const { username } = b.clicker.user;
     const req = HELP_CACHE.get(username);
     if (!req || !req.topicId) {
@@ -56,8 +82,12 @@ bot.on('clickButton', async (b) => {
     const count = await dbUtil.helpQueueCount(client);
     await dbUtil.close(client);
     await botCommands.Organizer.sendHelpRequestToOrganizers(b, req.username, req.topicId, req.time, req.organizer);
-    await b.reply.send(`You joined the queue! An organizer will contact you shortly\`\`\`Line position: ${count}\`\`\``);
+    await b.reply.send(`You joined the queue! ${req.organizer ?? 'An organizer'} will contact you shortly\`\`\`Line position: ${count}\`\`\``);
     HELP_CACHE.delete(username);
+  } else if (idPrefix === orgUtil.helpRequestInProgressPrefix) {
+    await botCommands.Organizer.helpRequestInProgress(b);
+  } else if (idPrefix === orgUtil.helpRequestCancelIdPrefix) {
+    await botCommands.Organizer.cancelHelpRequest(b);
   }
 });
 

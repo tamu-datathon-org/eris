@@ -42,14 +42,14 @@ const organizers = [
 
 const channel = 'help-queue'; // 'Organizers';
 
-const helpRequestContactIdSuffix = 'btn_contact_sender';
+const helpRequestInProgressPrefix = 'btn_contact_sender';
 
-const helpRequestCancelIdSuffix = 'btn_contact_sender';
+const helpRequestCancelIdPrefix = 'btn_cancel_sender';
 
 module.exports = {
     topics,
     organizers,
     channel,
-    helpRequestCancelIdSuffix,
-    helpRequestContactIdSuffix,
+    helpRequestCancelIdPrefix,
+    helpRequestInProgressPrefix,
 };

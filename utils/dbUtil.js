@@ -119,6 +119,13 @@ const addHelpRequest = async (client, sender, topicId, time, organizer = null) =
     });
 };
 
+const removeHelpRequest = async (client, sender, time) => {
+    await client.db(DB_NAME).collection('helpqueue').deleteOne({
+        sender,
+        time,
+    });
+};
+
 /**
  * gets the top 5 oldest requests in helpqueue
  * @param {MongoClient} client 
@@ -151,4 +158,5 @@ module.exports = {
     addHelpRequest,
     queryHelpQueue,
     helpQueueCount,
+    removeHelpRequest,
 };
