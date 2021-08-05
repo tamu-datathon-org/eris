@@ -34,7 +34,7 @@ const sendReminder = async (msg, username, eventName, eventId, time, timeDomain)
       .setTitle(`WAKE UP ${username}!`)
       .setColor(0x80FFD5)
       .setDescription(`${eventName} is ${timeDomain === 'm' ? `in ${time} mins` : timeDomain === 'h' ? `in ${time} hrs` : timeDomain === 'd' ? `in ${time} days` : 'soon'}!`);
-    await msg.channel.send(embed);
+    await msg.author.send(embed);
     const client = await dbUtil.connect();
     await removeReminderIfExists(client, username, eventId);
     await dbUtil.close(client);
@@ -90,7 +90,7 @@ module.exports =  {
             await createReminder(msg, args, client);
             await dbUtil.close(client);
         } catch (err) {
-            await msg.channel.send(`sorry ${err.message}`);
+            await msg.author.send(`sorry ${err.message}`);
             await dbUtil.close(client);
         }
     },

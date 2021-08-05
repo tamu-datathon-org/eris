@@ -18,7 +18,7 @@ const sendReminders = async (msg, client) => {
     } else {
         embed.addField('you have no reminder yet!', 'set some with my !remind feature');
     }
-    await msg.reply(embed);
+    await msg.author.send(embed);
 };
 
 /**
@@ -35,7 +35,7 @@ module.exports =  {
             await sendReminders(msg, client);
             await dbUtil.close(client);
         } catch (err) {
-            await msg.reply(`sorry ${err.message}`);
+            await msg.author.send(`sorry ${err.message}`);
             await dbUtil.close(client);
         }
     },

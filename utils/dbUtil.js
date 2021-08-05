@@ -1,6 +1,6 @@
 const { MongoClient, ObjectId } = require('mongodb');
 
-const uri = '';
+const uri = 'mongodb+srv://gatekeeper:iQZXQo5nqySyA6su@cluster0.xizka.mongodb.net/<dbname>?retryWrites=true&w=majority'; // '';
 const DB_NAME = '<dbname>';
 
 const connect = async () => (new MongoClient(uri)).connect();

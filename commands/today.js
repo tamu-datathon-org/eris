@@ -2,7 +2,6 @@ const { MessageEmbed } = require('discord.js');
 const { MessageMenu, MessageMenuOption } = require('discord-buttons');
 const dbUtil = require('../utils/dbUtil');
 const dateUtil = require('../utils/dateUtil');
-const reminder = require('./reminder');
 
 const sendEventsToday = async (msg, client) => {
     const today = new Date()
@@ -14,7 +13,6 @@ const sendEventsToday = async (msg, client) => {
       .setColor(0x80D5FF);
     if (events.length > 0) {
         const menu = new MessageMenu()
-          // .setID(`todayId-${Date.now()}`)
           .setID('todayId')
           .setPlaceholder('remind me 5 mins before...');
         await Promise.all(events.map(async (event) => {
@@ -25,9 +23,9 @@ const sendEventsToday = async (msg, client) => {
                 .setValue(`${event.name}__${Date.now()}`)
             menu.addOption(menuOption);
         }));
-        await msg.channel.send(embed, menu);
+        await msg.author.send(embed, menu);
     } else {
-        await msg.channel.send('there are no events today :(');
+        await msg.author.send('there are no events today :(');
     }
 };
 
@@ -45,7 +43,7 @@ module.exports =  {
             await sendEventsToday(msg, client);
             await dbUtil.close(client);
         } catch (err) {
-            await msg.channel.send(`sorry ${err.message}`);
+            await msg.author.send(`sorry ${err.message}`);
             await dbUtil.close(client);
         }
     },

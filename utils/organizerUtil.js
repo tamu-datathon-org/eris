@@ -40,7 +40,9 @@ const organizers = [
     },
 ];
 
-const channel = 'help-queue'; // 'Organizers';
+const guildName = `testgreg's server`;
+
+const helpChannel = 'help-queue';
 
 const helpRequestInProgressPrefix = 'btn_contact_sender';
 
@@ -49,7 +51,8 @@ const helpRequestCancelIdPrefix = 'btn_cancel_sender';
 module.exports = {
     topics,
     organizers,
-    channel,
+    helpChannel,
     helpRequestCancelIdPrefix,
     helpRequestInProgressPrefix,
+    guildName,
 };

@@ -20,11 +20,10 @@ const cancelHelpRequest = async (btn) => {
     await btn.message.delete();
 };
 
-const sendHelpRequestToOrganizers = async (msg, sender, topicId, time, organizer = null) => {
-    const helpChannel = await msg.guild.channels.cache.find(i => i.name === orgUtil.channel);
+const sendHelpRequestToOrganizers = async (helpChannel, sender, topicId, time, organizer, count) => {
     const btnAnswer = new MessageButton()
       .setStyle('blurple')
-      .setLabel('I Will Contact') 
+      .setLabel('I Will Contact')
       .setID(`${orgUtil.helpRequestInProgressPrefix}-${time.getTime()}-${sender}`);
     const btnCancel = new MessageButton()
       .setStyle('red')
@@ -32,11 +31,11 @@ const sendHelpRequestToOrganizers = async (msg, sender, topicId, time, organizer
       .setID(`${orgUtil.helpRequestCancelIdPrefix}-${time.getTime()}-${sender}`);
     const row = new MessageActionRow()
       .addComponents([btnAnswer, btnCancel]);
-    console.log(topicId);
     const topicDesc = (orgUtil.topics.find(i => i.id === topicId)).desc;
     await helpChannel.send(`
         Topic \`\`\`${topicDesc}\`\`\`Scheduled At \`\`\`${await dateUtil.formatDate(time)}\`\`\`User \`\`\`${sender}\`\`\`For \`\`\`${organizer ?? 'anyone'}\`\`\`
         `, row);
+    await helpChannel.send(`${count} requests waiting...`);
 };
 
 const sendHelpForm = async (msg) => {
@@ -55,7 +54,7 @@ const sendHelpForm = async (msg) => {
       .setMaxValues(1)
       .setMinValues(0)
     if ((orgUtil.organizers?.length === 0) || (orgUtil.topics?.length === 0)) {
-        return msg.channel.send('sorry, this feature is not supported right now');
+        return msg.author.send('sorry, this feature is not supported right now');
     }
     orgUtil.organizers.forEach((o) => {
         const option = new MessageMenuOption()
@@ -70,9 +69,9 @@ const sendHelpForm = async (msg) => {
           .setDescription(t.desc);
         topicMenu.addOption(option);
     });
-    await msg.channel.send('What topic would you like to discuss?', topicMenu);
-    await msg.channel.send('Is there a certain organizer you would like to speak with? (optional)', organizerMenu);
-    await msg.channel.send('Join the Queue!', btn);
+    await msg.author.send('What topic would you like to discuss?', topicMenu);
+    await msg.author.send('Is there a certain organizer you would like to speak with? (optional)', organizerMenu);
+    await msg.author.send('Join the Queue!', btn);
 };
 
 /**
@@ -82,13 +81,12 @@ module.exports =  {
     name: '!organizer',
     description: 'Get help or advice from a TD organizer',
     syntax: '!organizer',
-    getFiveHelpRequests,
     sendHelpRequestToOrganizers,
     cancelHelpRequest,
     helpRequestInProgress,
     async execute(msg, args) {
         try {
-            if (msg.channel.name === orgUtil.channel) throw new Error(`we keepin it clean in the help-queue!`);
+            if (msg.channel.name === orgUtil.helpChannel) throw new Error(`we keepin it clean in the help-queue!`);
             await sendHelpForm(msg);
         } catch (err) {
             await msg.channel.send(`sorry ${err.message}`);

@@ -22,7 +22,7 @@ Object.keys(botCommands).map(key => {
 });
 
 // set the bot token
-const TOKEN = process.env.DISCORD_BOT_TOKEN;
+const TOKEN = 'ODcwNDM3MTc5NzExNjk2OTI3.YQMvyw.m8QPE1ouZGjxqCjiZNL6ovMmNxo'; // process.env.DISCORD_BOT_TOKEN;
 bot.login(TOKEN);
 
 // wait until the bot is ready
@@ -77,13 +77,20 @@ bot.on('clickButton', async (b) => {
       return b.reply.send(`You didn't provide a topic!`);
     }
     req.time = new Date();
+    const guild = bot.guilds.cache.find(i => i.name === orgUtil.guildName);
+    const helpChannel = guild.channels.cache.find(i => i.name === orgUtil.helpChannel);
+    if (!helpChannel) {
+      return b.reply.send(`sorry ${orgUtil.helpChannel} has not been created`);
+    }
     const client = await dbUtil.connect();
-    await dbUtil.addHelpRequest(client, req.username, req.topicId, req.time, req.organizer);
     const count = await dbUtil.helpQueueCount(client);
-    await dbUtil.close(client);
-    await botCommands.Organizer.sendHelpRequestToOrganizers(b, req.username, req.topicId, req.time, req.organizer);
+    // this apprently has to be timely
     await b.reply.send(`You joined the queue! ${req.organizer ?? 'An organizer'} will contact you shortly\`\`\`Line position: ${count}\`\`\``);
+    await dbUtil.addHelpRequest(client, req.username, req.topicId, req.time, req.organizer);
+    await dbUtil.close(client);
+    await botCommands.Organizer.sendHelpRequestToOrganizers(helpChannel, req.username, req.topicId, req.time, req.organizer, count);
     HELP_CACHE.delete(username);
+    console.log(JSON.stringify(HELP_CACHE));
   } else if (idPrefix === orgUtil.helpRequestInProgressPrefix) {
     await botCommands.Organizer.helpRequestInProgress(b);
   } else if (idPrefix === orgUtil.helpRequestCancelIdPrefix) {
@@ -104,7 +111,7 @@ bot.on('message', msg => {
       Object.keys(botCommands).map(key => {
         embed.addField(botCommands[key].name, `${botCommands[key].description} \`\`\`${botCommands[key].syntax}\`\`\``);
       });
-      msg.reply(embed);
+      msg.author.send(embed);
     }
     return track(msg);
   };
@@ -113,6 +120,6 @@ bot.on('message', msg => {
     bot.commands.get(command).execute(msg, args);
   } catch (error) {
     console.error(error);
-    msg.reply('there was an error trying to execute that command!');
+    msg.author.send('there was an error trying to execute that command!');
   }
 });
