@@ -22,7 +22,7 @@ Object.keys(botCommands).map(key => {
 });
 
 // set the bot token
-const TOKEN = 'ODcwNDM3MTc5NzExNjk2OTI3.YQMvyw.m8QPE1ouZGjxqCjiZNL6ovMmNxo'; // process.env.DISCORD_BOT_TOKEN;
+const TOKEN = process.env.DISCORD_BOT_TOKEN;
 bot.login(TOKEN);
 
 // wait until the bot is ready
