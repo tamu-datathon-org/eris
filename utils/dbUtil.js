@@ -1,23 +1,40 @@
 const { MongoClient, ObjectId } = require('mongodb');
 
-const uri = '';
-const DB_NAME = '<dbname>';
+const uri = process.env.MONGODB_URI;
+const DB_NAME = process.env.MONGODB_DB;
 
-const connect = async () => (new MongoClient(uri)).connect();
+const collectionList = [ 'reminder', 'events', 'messages', 'helpqueue' ];
+
+const connect = async () => mongoInit();
+
+/**
+ * Creates a MongoDB client and creates collections if they don't already exist
+ * @returns {MongoClient}
+ */
+const mongoInit = async () => {
+    const client = (new MongoClient(uri)).connect();
+    const collectionNames = client.db.getCollectionNames();
+    collectionList.forEach(collName => {
+        if (!collectionNames.includes(collName)) {
+            client.db.createCollection(collName);
+        }
+    })
+    return client;
+}
 
 const close = async (client) => {
     if (client) await client.close();
 };
 
 /**
- * insert one into erisreminder
+ * insert one into reminder
  * @param {MongoClient} client 
  * @param {string} sender 
  * @param {string} eventId 
  * @param {Date} timeBefore 
  */
 const addReminder = async (client, sender, eventId, timeBefore) => {
-    await client.db(DB_NAME).collection('erisreminder').insertOne({
+    await client.db(DB_NAME).collection('reminder').insertOne({
         sender,
         eventId: new ObjectId(eventId),
         timeBefore,
@@ -31,7 +48,7 @@ const addReminder = async (client, sender, eventId, timeBefore) => {
  * @returns {Array}
  */
 const getAllRemindersOfUser = async (client, sender) => {
-    const cursor = await client.db(DB_NAME).collection('erisreminder').aggregate([
+    const cursor = await client.db(DB_NAME).collection('reminder').aggregate([
         { $match: { sender } },
         { $lookup: {
             from: 'events',
@@ -44,13 +61,13 @@ const getAllRemindersOfUser = async (client, sender) => {
 };
 
 /**
- * deletes all erisreminder documents with the given eventId & sender (if the event is changed or something)
+ * deletes all reminder documents with the given eventId & sender (if the event is changed or something)
  * @param {MongoClient} client 
  * @param {string} sender
  * @param {string} eventId 
  */
 const removeReminder = async (client, sender, eventId) => {
-    await client.db(DB_NAME).collection('erisreminder').deleteMany({
+    await client.db(DB_NAME).collection('reminder').deleteMany({
         sender,
         eventId: new ObjectId(eventId),
     });
@@ -87,14 +104,14 @@ const getEventsInDateRange = async (client, lower, upper) => {
 }
 
 /**
- * insert one into eristracker
+ * insert one into messages
  * @param {MongoClient} client 
  * @param {string} sender 
  * @param {string} senderType 
  * @param {string} channel 
  */
-const addTracker = async (client, sender, senderType, channel, content) => {
-    await client.db(DB_NAME).collection('eristracker').insertOne({
+const addMessage = async (client, sender, senderType, channel, content) => {
+    await client.db(DB_NAME).collection('messages').insertOne({
         sender,
         senderType,
         channel,
@@ -152,7 +169,7 @@ module.exports = {
     addReminder,
     getAllRemindersOfUser,
     removeReminder,
-    addTracker,
+    addMessage,
     getEvent,
     getEventsInDateRange,
     addHelpRequest,
