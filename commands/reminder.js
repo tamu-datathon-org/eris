@@ -46,33 +46,31 @@ const createReminder = async (msg, args, client) => {
     const timeBefore = parseInt(_args[1]) * dateUtil.TIME_DOMAIN[_args[2]];
 
     // get details
-    const event = await dbUtil.getEvent(client, _args[0]);
+    const event = await dbUtil.getEvent(_args[0]);
     if (!event) throw new Error(`i can't find this event!`);
-    const { time } = event;
-    const _id = event._id.toString();
-    const { name } = event;
+    const { id, startTime, name } = event;
     const { username } = msg.author;
 
     // validate the reminder
-    if (!time) throw new Error('this event does have a set time yet, stay tuned!');
-    if (time <= Date.now()) throw new Error(`${name} has passed!`);
-    const tm = time - Date.now() - timeBefore;
+    if (!startTime) throw new Error('this event does have a set time yet, stay tuned!');
+    if (startTime <= Date.now()) throw new Error(`${name} has passed!`);
+    const tm = startTime - Date.now() - timeBefore;
     if (tm < 0) {
-        const timeUntil = time - Date.now();
+        const timeUntil = startTime - Date.now();
         const niceTimeUntil = await dateUtil.msToTimeDomain(timeUntil) || 'any second';
         throw new Error(`i can't set that reminder ...the ${name} is in ${niceTimeUntil}!`);
     }
 
     // actually add the reminder
-    const _timeout = setTimeout(() => sendReminder(msg, username, name, _id, _args[1], _args[2]), tm);
+    const _timeout = setTimeout(() => sendReminder(msg, username, name, id, _args[1], _args[2]), tm);
 
     // respond timely
     await msg.channel.send(`reminder set for ${await dateUtil.msToTimeDomain(timeBefore)} before ${name}`);
 
     // manage storage
-    await removeReminderIfExists(client, username, _id);
-    REMINDERS.set(_id, _timeout);
-    await dbUtil.addReminder(client, username, _id, timeBefore);
+    await removeReminderIfExists(client, username, id);
+    REMINDERS.set(id, _timeout);
+    await dbUtil.addReminder(client, username, id, timeBefore);
 };
 
 /**

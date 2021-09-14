@@ -75,14 +75,13 @@ const removeReminder = async (client, sender, eventId) => {
 
 /**
  * query an event
- * @param {MongoClient} client 
  * @param {string} name 
  * @returns {Object}
  */
-const getEvent = async (client, name) => {
-    const result = await client.db(DB_NAME).collection('events').findOne({
-        name,
-    });
+const getEvent = async (name) => {
+    // currently name has to be the md file name, but based on the usage it should be the event's name, need api for that
+    const resultResponse = await fetch(`/events/api/json/${name}`);
+    const result = await resultResponse.json();
     return result;
 }
 
