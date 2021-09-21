@@ -1,9 +1,10 @@
+import fetch from 'node-fetch';
 const { MongoClient, ObjectId } = require('mongodb');
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
 
-const collectionList = [ 'reminder', 'events', 'messages', 'helpqueue' ];
+const collectionNameList = [ 'reminder', 'events', 'messages', 'helpqueue' ];
 
 const connect = async () => mongoInit();
 
@@ -12,11 +13,13 @@ const connect = async () => mongoInit();
  * @returns {MongoClient}
  */
 const mongoInit = async () => {
-    const client = (new MongoClient(uri)).connect();
-    const collectionNames = client.db.getCollectionNames();
-    collectionList.forEach(collName => {
-        if (!collectionNames.includes(collName)) {
-            client.db.createCollection(collName);
+    const client = await (new MongoClient(uri)).connect();
+    const db = client.db(DB_NAME);
+    const collectionList = await db.listCollections().toArray();
+    const collectionNames = new Set(collectionList.map(coll => coll.name));
+    collectionNameList.forEach(collName => {
+        if (!collectionNames.has(collName)) {
+            db.createCollection(collName);
         }
     })
     return client;
@@ -80,8 +83,10 @@ const removeReminder = async (client, sender, eventId) => {
  */
 const getEvent = async (name) => {
     // currently name has to be the md file name, but based on the usage it should be the event's name, need api for that
-    const resultResponse = await fetch(`/events/api/json/${name}`);
+    // const resultResponse = await fetch(`/events/api/json/${name}`);
+    const resultResponse = await fetch(`https://tamudatathon.com/events/api/json/${name}`);
     const result = await resultResponse.json();
+    console.log(result);
     return result;
 }
 

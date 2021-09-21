@@ -1,5 +1,6 @@
-require('dotenv').config();
-const Discord = require('discord.js');
+import dotenv from 'dotenv';
+dotenv.config();
+import Discord from 'discord.js';
 const bot = new Discord.Client();
 require('discord-buttons')(bot);
 bot.commands = new Discord.Collection();
