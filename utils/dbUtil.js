@@ -1,18 +1,18 @@
 import fetch from 'node-fetch';
-const { MongoClient, ObjectId } = require('mongodb');
+import { MongoClient, ObjectId } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
 
 const collectionNameList = [ 'reminder', 'events', 'messages', 'helpqueue' ];
 
-const connect = async () => mongoInit();
+export const connect = async () => mongoInit();
 
 /**
  * Creates a MongoDB client and creates collections if they don't already exist
  * @returns {MongoClient}
  */
-const mongoInit = async () => {
+export const mongoInit = async () => {
     const client = await (new MongoClient(uri)).connect();
     const db = client.db(DB_NAME);
     const collectionList = await db.listCollections().toArray();
@@ -25,7 +25,7 @@ const mongoInit = async () => {
     return client;
 }
 
-const close = async (client) => {
+export const close = async (client) => {
     if (client) await client.close();
 };
 
@@ -36,7 +36,7 @@ const close = async (client) => {
  * @param {string} eventId 
  * @param {Date} timeBefore 
  */
-const addReminder = async (client, sender, eventId, timeBefore) => {
+export const addReminder = async (client, sender, eventId, timeBefore) => {
     await client.db(DB_NAME).collection('reminder').insertOne({
         sender,
         eventId: new ObjectId(eventId),
@@ -50,7 +50,7 @@ const addReminder = async (client, sender, eventId, timeBefore) => {
  * @param {string} sender 
  * @returns {Array}
  */
-const getAllRemindersOfUser = async (client, sender) => {
+export const getAllRemindersOfUser = async (client, sender) => {
     const cursor = await client.db(DB_NAME).collection('reminder').aggregate([
         { $match: { sender } },
         { $lookup: {
@@ -69,7 +69,7 @@ const getAllRemindersOfUser = async (client, sender) => {
  * @param {string} sender
  * @param {string} eventId 
  */
-const removeReminder = async (client, sender, eventId) => {
+export const removeReminder = async (client, sender, eventId) => {
     await client.db(DB_NAME).collection('reminder').deleteMany({
         sender,
         eventId: new ObjectId(eventId),
@@ -81,7 +81,7 @@ const removeReminder = async (client, sender, eventId) => {
  * @param {string} name 
  * @returns {Object}
  */
-const getEvent = async (name) => {
+export const getEvent = async (name) => {
     // currently name has to be the md file name, but based on the usage it should be the event's name, need api for that
     // const resultResponse = await fetch(`/events/api/json/${name}`);
     const resultResponse = await fetch(`https://tamudatathon.com/events/api/json/${name}`);
@@ -97,7 +97,7 @@ const getEvent = async (name) => {
  * @param {Date} upper 
  * @returns {Array}
  */
-const getEventsInDateRange = async (client, lower, upper) => {
+export const getEventsInDateRange = async (client, lower, upper) => {
     const result = await client.db(DB_NAME).collection('events').find({
         time: {
             $gte: lower,
@@ -114,7 +114,7 @@ const getEventsInDateRange = async (client, lower, upper) => {
  * @param {string} senderType 
  * @param {string} channel 
  */
-const addMessage = async (client, sender, senderType, channel, content) => {
+export const addMessage = async (client, sender, senderType, channel, content) => {
     await client.db(DB_NAME).collection('messages').insertOne({
         sender,
         senderType,
@@ -131,7 +131,7 @@ const addMessage = async (client, sender, senderType, channel, content) => {
  * @param {Date} time 
  * @param {string} organizer 
  */
-const addHelpRequest = async (client, sender, topicId, time, organizer = null) => {
+export const addHelpRequest = async (client, sender, topicId, time, organizer = null) => {
     await client.db(DB_NAME).collection('helpqueue').insertOne({
         sender,
         topicId,
@@ -140,7 +140,7 @@ const addHelpRequest = async (client, sender, topicId, time, organizer = null) =
     });
 };
 
-const removeHelpRequest = async (client, sender, time) => {
+export const removeHelpRequest = async (client, sender, time) => {
     await client.db(DB_NAME).collection('helpqueue').deleteOne({
         sender,
         time,
@@ -152,7 +152,7 @@ const removeHelpRequest = async (client, sender, time) => {
  * @param {MongoClient} client 
  * @returns {Array}
  */
-const queryHelpQueue = async (client) => {
+export const queryHelpQueue = async (client) => {
     const result = await client.db(DB_NAME).collection('helpqueue').aggregate([
         { $sort : { time : 1 } },
         { $limit: 5 },
@@ -165,19 +165,4 @@ const queryHelpQueue = async (client) => {
  * @param {MongoClient} client 
  * @returns {Integer}
  */
-const helpQueueCount = async (client) => client.db(DB_NAME).collection('helpqueue').find().count();
-
-module.exports = {
-    connect,
-    close,
-    addReminder,
-    getAllRemindersOfUser,
-    removeReminder,
-    addMessage,
-    getEvent,
-    getEventsInDateRange,
-    addHelpRequest,
-    queryHelpQueue,
-    helpQueueCount,
-    removeHelpRequest,
-};
+export const helpQueueCount = async (client) => client.db(DB_NAME).collection('helpqueue').find().count();

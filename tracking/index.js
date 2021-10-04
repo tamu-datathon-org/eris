@@ -1,8 +1,8 @@
-const dbUtil = require('../utils/dbUtil');
+import * as dbUtil from '../utils/dbUtil.js';
 
 const TESTING = true;
 
-module.exports = async (msg) => {
+const track = async (msg) => {
   if (TESTING) return;
   const client = await dbUtil.connect();
   const userType = 'type';
@@ -10,3 +10,5 @@ module.exports = async (msg) => {
   await dbUtil.close(client);
   return;
 }
+
+export default track;
