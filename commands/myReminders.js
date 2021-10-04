@@ -1,6 +1,6 @@
-const { MessageEmbed } = require('discord.js');
-const dbUtil = require('../utils/dbUtil');
-const dateUtil = require('../utils/dateUtil');
+import { MessageEmbed } from 'discord.js';
+import * as dbUtil from '../utils/dbUtil.js';
+import * as dateUtil from '../utils/dateUtil.js';
 
 const sendReminders = async (msg, client) => {
     const { username } = msg.author;
@@ -24,19 +24,17 @@ const sendReminders = async (msg, client) => {
 /**
  * let clients see their reminders
  */
-module.exports =  {
-    name: '!my-reminders',
-    description: 'View your reminders for our awesome TD events!',
-    syntax: '!my-reminders',
-    async execute(msg, args) {
-        let client = null;
-        try {
-            client = await dbUtil.connect();
-            await sendReminders(msg, client);
-            await dbUtil.close(client);
-        } catch (err) {
-            await msg.author.send(`sorry ${err.message}`);
-            await dbUtil.close(client);
-        }
-    },
-};
+export const name = '!my-reminders';
+export const description = 'View your reminders for our awesome TD events';
+export const syntax = '!y-reminders';
+export const execute = async (msg, args) => {
+    let client = null;
+    try {
+        client = await dbUtil.connect();
+        await sendReminders(msg, client);
+        await dbUtil.close(client);
+    } catch (err) {
+        await msg.author.send(`sorry ${err.message}`);
+        await dbUtil.close(client);
+    }
+}

@@ -1,12 +1,14 @@
-require('dotenv').config();
-const Discord = require('discord.js');
+import dotenv from 'dotenv';
+dotenv.config();
+import Discord from 'discord.js';
 const bot = new Discord.Client();
-require('discord-buttons')(bot);
+import discordButtonsConstructor from 'discord-buttons';
+discordButtonsConstructor(bot);
 bot.commands = new Discord.Collection();
-const botCommands = require('./commands');
-const track = require('./tracking');
-const dbUtil = require('./utils/dbUtil');
-const orgUtil = require('./utils/organizerUtil');
+import * as botCommands from './commands/index.js';
+import * as track from './tracking/index.js';
+import * as dbUtil from './utils/dbUtil.js';
+import * as orgUtil from './utils/organizerUtil.js';
 
 // cache for organizer help requests
 const HELP_CACHE = new Map();
