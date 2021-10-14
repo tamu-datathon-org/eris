@@ -6,7 +6,7 @@ import discordButtonsConstructor from 'discord-buttons';
 discordButtonsConstructor(bot);
 bot.commands = new Discord.Collection();
 import * as botCommands from './commands/index.js';
-import * as track from './tracking/index.js';
+import track from './tracking/index.js';
 import * as dbUtil from './utils/dbUtil.js';
 import * as orgUtil from './utils/organizerUtil.js';
 
@@ -39,9 +39,9 @@ bot.on('clickMenu', async (m) => {
   if (m.id.split('__')[0] === 'todayId') {
       await m.reply.think();
       m.author = m.clicker.user;
-      const _client = await dbUtil.connect();
-      await botCommands.Remind.createReminder(m, [m.values[0].split('__')[0]], _client);
-      await dbUtil.close(_client);
+      const client = await dbUtil.connect();
+      await botCommands.Remind.createReminder(m, [m.values[0].split('__')[0]], client);
+      await dbUtil.close(client);
       await m.reply.edit('done!');
   } else if (idPrefix === 'topicId') {
       await m.reply.think();
@@ -111,7 +111,8 @@ bot.on('message', msg => {
         .setColor(0xB88DFF)
         .setDescription('see what eris can do for you');
       Object.keys(botCommands).map(key => {
-        embed.addField(botCommands[key].name, `${botCommands[key].description} \`\`\`${botCommands[key].syntax}\`\`\``);
+        if (botCommands[key].name !== "!organizer")
+          embed.addField(botCommands[key].name, `${botCommands[key].description} \`\`\`${botCommands[key].syntax}\`\`\``);
       });
       msg.author.send(embed);
     }

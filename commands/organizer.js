@@ -81,10 +81,10 @@ export const name = '!organizer';
 export const description = 'Get help or advice from a TD organizer';
 export const syntax = '!organizer';
 export const execute = async (msg, args) => {
-  try {
-    if (msg.channel.name === orgUtil.helpChannel) throw new Error(`we keepin it clean in the help-queue!`);
-    await sendHelpForm(msg);
-  } catch (err) {
-    await msg.channel.send(`sorry ${err.message}`);
-  }
+  // try {
+  //   if (msg.channel.name === orgUtil.helpChannel) throw new Error(`we keepin it clean in the help-queue!`);
+  //   await sendHelpForm(msg);
+  // } catch (err) {
+  //   await msg.channel.send(`sorry ${err.message}`);
+  // }
 }

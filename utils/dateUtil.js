@@ -15,9 +15,9 @@ export const formatDate = async (date) => {
     return (`${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}  ${strTime}`);
 };
 
-export const msToTimeDomain = async (ms) => {
-    return Math.floor(ms / exports.TIME_DOMAIN.d) ?
-        `${Math.floor(ms / exports.TIME_DOMAIN.d)} days` : Math.floor(ms / exports.TIME_DOMAIN.h) ?
-            `${Math.floor(ms / exports.TIME_DOMAIN.h)} hrs` : Math.floor(ms / exports.TIME_DOMAIN.m) ?
-                `${Math.floor(ms / exports.TIME_DOMAIN.m)} mins` : null;
+export const msToTimeDomain = (ms) => {
+    return Math.floor(ms / TIME_DOMAIN.d) ?
+        `${Math.floor(ms / TIME_DOMAIN.d)} days` : Math.floor(ms / TIME_DOMAIN.h) ?
+            `${Math.floor(ms / TIME_DOMAIN.h)} hrs` : Math.floor(ms / TIME_DOMAIN.m) ?
+                `${Math.floor(ms / TIME_DOMAIN.m)} mins` : null;
 };

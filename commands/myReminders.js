@@ -11,9 +11,9 @@ const sendReminders = async (msg, client) => {
       .setColor(0x00C3C3);
     if (reminders.length > 0) {
         await Promise.all(await reminders.map(async (reminder) => {
-            const event_doc = reminder.event_docs[0];
-            const niceTimeBefore = await dateUtil.msToTimeDomain(reminder.timeBefore);
-            if (niceTimeBefore && event_doc) embed.addField(event_doc.name, `\`\`\`${niceTimeBefore} before\`\`\` ${await dateUtil.formatDate(new Date(event_doc.time))}`);
+            const event_doc = await dbUtil.getEventFromId(reminder.eventId);
+            const niceTimeBefore = dateUtil.msToTimeDomain(reminder.timeBefore);
+            if (niceTimeBefore && event_doc) embed.addField(event_doc.name, `\`\`\`${niceTimeBefore} before\`\`\` ${await dateUtil.formatDate(new Date(event_doc.startTime))}`);
         }));
     } else {
         embed.addField('you have no reminder yet!', 'set some with my !remind feature');
@@ -26,7 +26,7 @@ const sendReminders = async (msg, client) => {
  */
 export const name = '!my-reminders';
 export const description = 'View your reminders for our awesome TD events';
-export const syntax = '!y-reminders';
+export const syntax = '!my-reminders';
 export const execute = async (msg, args) => {
     let client = null;
     try {

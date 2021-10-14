@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import fetch from 'node-fetch';
 import { MongoClient, ObjectId } from 'mongodb';
 
@@ -37,11 +39,16 @@ export const close = async (client) => {
  * @param {Date} timeBefore 
  */
 export const addReminder = async (client, sender, eventId, timeBefore) => {
-    await client.db(DB_NAME).collection('reminder').insertOne({
-        sender,
-        eventId: new ObjectId(eventId),
-        timeBefore,
-    });
+    const client2 = await connect();
+    try {
+        await client2.db(DB_NAME).collection('reminder').insertOne({
+            sender,
+            eventId,
+            timeBefore,
+        });
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 /**
@@ -52,13 +59,7 @@ export const addReminder = async (client, sender, eventId, timeBefore) => {
  */
 export const getAllRemindersOfUser = async (client, sender) => {
     const cursor = await client.db(DB_NAME).collection('reminder').aggregate([
-        { $match: { sender } },
-        { $lookup: {
-            from: 'events',
-            localField: 'eventId',
-            foreignField: '_id',
-            as: 'event_docs',
-        } },
+        { $match: { sender } }
     ]);
     return cursor.toArray();
 };
@@ -82,12 +83,21 @@ export const removeReminder = async (client, sender, eventId) => {
  * @returns {Object}
  */
 export const getEvent = async (name) => {
-    // currently name has to be the md file name, but based on the usage it should be the event's name, need api for that
-    // const resultResponse = await fetch(`/events/api/json/${name}`);
-    const resultResponse = await fetch(`https://tamudatathon.com/events/api/json/${name}`);
-    const result = await resultResponse.json();
-    console.log(result);
-    return result;
+    const resultResponse = await fetch(`https://tamudatathon.com/events/api/json/`);
+    const events = await resultResponse.json();
+    const filteredEvents = events.filter(e => e.name == name);
+    return filteredEvents[0];
+}
+
+/**
+ * query an event using its ID
+ * @param {string} id 
+ * @returns {Object}
+ */
+ export const getEventFromId = async (id) => {
+    const resultResponse = await fetch(`https://tamudatathon.com/events/api/json/${id}`);
+    const event = await resultResponse.json();
+    return event;
 }
 
 /**
@@ -98,13 +108,14 @@ export const getEvent = async (name) => {
  * @returns {Array}
  */
 export const getEventsInDateRange = async (client, lower, upper) => {
-    const result = await client.db(DB_NAME).collection('events').find({
-        time: {
-            $gte: lower,
-            $lt: upper,
-        }
-    });
-    return result.toArray();
+    const eventsRes = await fetch('https://tamudatathon.com/events/api/json');
+    const events = await eventsRes.json();
+    const filteredEvents = events.filter(e => {
+        const startTimeObj = new Date(e.startTime);
+        return startTimeObj >= Date.now()
+        // ^ should also check for whether the event is "today"
+    })
+    return filteredEvents;
 }
 
 /**

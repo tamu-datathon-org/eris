@@ -4,9 +4,9 @@ import * as dbUtil from '../utils/dbUtil.js';
 import * as dateUtil from '../utils/dateUtil.js';
 
 const sendEventsToday = async (msg, client) => {
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
     const events = await dbUtil.getEventsInDateRange(client, today, tomorrow);
     const embed = new MessageEmbed()
         .setTitle(`Today's Events`)
@@ -16,7 +16,7 @@ const sendEventsToday = async (msg, client) => {
             .setID('todayId')
             .setPlaceholder('remind me 5 mins before...');
         await Promise.all(events.map(async (event) => {
-            embed.addField(event.name, `${event.description}\`\`\`${await dateUtil.formatDate(new Date(event.time))}\`\`\``);
+            embed.addField(event.name, `\`\`\`${await dateUtil.formatDate(new Date(event.startTime))}\`\`\``);
             const menuOption = new MessageMenuOption()
                 .setLabel(event.name)
                 .setEmoji('⏰')
