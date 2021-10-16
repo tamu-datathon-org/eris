@@ -9,21 +9,21 @@ const sendEventsToday = async (msg, client) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const events = await dbUtil.getEventsInDateRange(client, today, tomorrow);
     const embed = new MessageEmbed()
-        .setTitle(`Today's Events`)
+        .setTitle(`TD 2021 Events`)
         .setColor(0x80D5FF);
     if (events.length > 0) {
-        const menu = new MessageMenu()
-            .setID('todayId')
-            .setPlaceholder('remind me 5 mins before...');
+        // const menu = new MessageMenu()
+        //     .setID('todayId')
+        //     .setPlaceholder('remind me 5 mins before...');
         await Promise.all(events.map(async (event) => {
             embed.addField(event.name, `\`\`\`${await dateUtil.formatDate(new Date(event.startTime))}\`\`\``);
-            const menuOption = new MessageMenuOption()
-                .setLabel(event.name)
-                .setEmoji('⏰')
-                .setValue(`${event.name}__${Date.now()}`)
-            menu.addOption(menuOption);
+            // const menuOption = new MessageMenuOption()
+            //     .setLabel(event.name)
+            //     .setEmoji('⏰')
+            //     .setValue(`${event.name}__${Date.now()}`)
+            // menu.addOption(menuOption);
         }));
-        await msg.author.send(embed, menu);
+        await msg.author.send(embed);
     } else {
         await msg.author.send('there are no events today :(');
     }
@@ -33,9 +33,9 @@ const sendEventsToday = async (msg, client) => {
  * let clients see the events today
  */
 
-export const name = '!today';
+export const name = '!events';
 export const description = 'See all the TD workshops, classes, and events happening today';
-export const syntax = '!today';
+export const syntax = '!events';
 export const execute = async (msg, args) => {
     let client = null;
     try {

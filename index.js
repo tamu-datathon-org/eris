@@ -111,7 +111,7 @@ bot.on('message', msg => {
         .setColor(0xB88DFF)
         .setDescription('see what eris can do for you');
       Object.keys(botCommands).map(key => {
-        if (botCommands[key].name !== "!organizer")
+        if (botCommands[key].name !== "!organizer" && botCommands[key].name !== "!my-reminders" && botCommands[key].name !== "!remind")
           embed.addField(botCommands[key].name, `${botCommands[key].description} \`\`\`${botCommands[key].syntax}\`\`\``);
       });
       msg.author.send(embed);

@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import fetch from 'node-fetch';
 import { MongoClient, ObjectId } from 'mongodb';
+import moment from 'moment';
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
@@ -110,11 +111,12 @@ export const getEvent = async (name) => {
 export const getEventsInDateRange = async (client, lower, upper) => {
     const eventsRes = await fetch('https://tamudatathon.com/events/api/json');
     const events = await eventsRes.json();
-    const filteredEvents = events.filter(e => {
-        const startTimeObj = new Date(e.startTime);
-        return startTimeObj >= Date.now()
-        // ^ should also check for whether the event is "today"
-    })
+    const filteredEvents = events.filter((e) => {
+        const tdStartDay = new Date('October 15, 2021 00:00:00-500');
+        const momentTest = moment(e.startTime, 'YYYY-MM-DD hh:mm A');
+        const eventStartTime = momentTest.isValid() ? momentTest.toDate() : new Date(e.startTime);
+        return eventStartTime > tdStartDay;
+      });
     return filteredEvents;
 }
 
